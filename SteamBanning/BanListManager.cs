@@ -75,7 +75,7 @@ namespace SteamBanning
         {
             BannedUsers = new Dictionary<CSteamID, string>();
             string[] UserList = BepinPlugin.Bindings.BanList.Value.Split(',');
-            if (UserList[0].IsNullOrWhiteSpace())
+            if (UserList.Length <= 1 && UserList[0].IsNullOrWhiteSpace())
             {
                 return;
             }
@@ -92,12 +92,23 @@ namespace SteamBanning
                     CSteamID SteamID = (CSteamID)ulongid;
                     if(SteamID.IsValid())
                     {
-                        BannedUsers.Add(SteamID, User[1]);
+                        if(!BanListContainsSteamID(SteamID))
+                        {
+                            BannedUsers.Add(SteamID, User[1]);
+                        }
+                        else
+                        {
+                            BepinPlugin.Log.LogError("Duplicate SteamID: " + id);
+                        }
+                    }
+                    else
+                    {
+                        BepinPlugin.Log.LogError("Bad SteamID: " + id);
                     }
                 }
                 else
                 {
-                    BepinPlugin.Log.LogError("Bad SteamID: " + id);
+                    BepinPlugin.Log.LogError("Bad SteamID Parse: " + id);
                 }
             }
         }

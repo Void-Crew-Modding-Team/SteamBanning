@@ -134,7 +134,7 @@ namespace SteamBanning
             List<UserDisplayObject> UDOsForRemoval = new List<UserDisplayObject>();
             foreach (UserDisplayObject UDO in UDOs)
             {
-                if (BanListManager.Instance.BanListContainsSteamID(UDO.SteamID))
+                if (!BanListManager.Instance.BanListContainsSteamID(UDO.SteamID))
                 {
                     UDOsForRemoval.Add(UDO);
                 }
@@ -238,7 +238,7 @@ namespace SteamBanning
             if (Time.time > LastUpdateTime + 5f)
             {
                 LastUpdateTime = Time.time;
-                UpdateUserDisplayObjectsForBanning();
+                UpdateUDOsForUnBanning();
             }
 
             if (UserDisplayObjects == null)
@@ -271,6 +271,7 @@ namespace SteamBanning
 
             //Unban Button
             GUI.color = Color.white;
+            Label("Selected user: " + (SelectedUser != null ? SelectedUser.PlayerName : "No User Selected"));
             if (Button("Unban"))
             {
                 if (SelectedUser != null)
