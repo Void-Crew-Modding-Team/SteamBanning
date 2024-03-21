@@ -13,8 +13,8 @@ namespace SteamBanning
         private void Awake()
         {
             Log = Logger;
+            Bindings.BanList = Config.Bind("General", "BanList", string.Empty, "Local Ban List. Formt: 'steamID:username'. separate multiple instances with ','");
             BanListManager.Instance = new BanListManager();
-            Bindings.BanList = Config.Bind("General", "BanList", string.Empty);
             Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
         }
 

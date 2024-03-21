@@ -7,7 +7,7 @@ namespace SteamBanning
     {
         public VoidManagerPlugin()
         {
-            Events.Instance.OnPlayerEnteredRoomEvent += BanListManager.Instance.OnPlayerJoin;
+            Events.Instance.PlayerEnteredRoom += BanListManager.Instance.OnPlayerJoin;
         }
 
         public override MultiplayerType MPType => MultiplayerType.Client;

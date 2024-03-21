@@ -1,7 +1,9 @@
-﻿using Photon.Pun;
+﻿using BepInEx;
+using Photon.Pun;
 using Photon.Realtime;
 using Steamworks;
 using System.Collections.Generic;
+using VoidManager;
 using VoidManager.Utilities;
 
 namespace SteamBanning
@@ -14,22 +16,24 @@ namespace SteamBanning
             internal set;
         }
 
-        List<CSteamID> BannedSteamIDs;
+        //List<CSteamID> BannedSteamIDs;
+        internal Dictionary<CSteamID, string> BannedUsers;
 
         public BanListManager()
         {
             LoadBannedSteamIDs();
         }
 
-        internal void OnPlayerJoin(Player JoiningPlayer)
+        internal void OnPlayerJoin(object source,  Events.PlayerEventArgs PlayerEventArg)
         {
+            Player JoiningPlayer = PlayerEventArg.player;
             CSteamID UserSteamID = (CSteamID)ulong.Parse(JoiningPlayer.UserId);
             if (BanListContainsSteamID(UserSteamID))
             {
                 if (PhotonNetwork.IsMasterClient)
                 {
                     BepinPlugin.Log.LogInfo($"Closing connection from banned user {JoiningPlayer.NickName} Steam ID: {JoiningPlayer.UserId}");
-                    PhotonNetwork.CloseConnection(JoiningPlayer);
+                    PhotonNetwork.CloseConnection(JoiningPlayer); //Vanilla 0.25.1 cannot handle getting kicked this early, and client will get stuck in a ghost room. VoidManager handles it, so most modded players are fine.
                 }
                 else
                 {
@@ -42,7 +46,7 @@ namespace SteamBanning
 
         public bool BanListContainsSteamID(CSteamID steamID)
         {
-            if(BannedSteamIDs.Contains(steamID))
+            if(BannedUsers.ContainsKey(steamID))
             {
                 return true;
             }
@@ -53,33 +57,47 @@ namespace SteamBanning
         {
             if(BanListContainsSteamID(steamID))
             {
-                BannedSteamIDs.Remove(steamID);
+                BannedUsers.Remove(steamID);
                 UpdateConfigFile();
             }
         }
 
-        public void AddToBanlist(CSteamID steamID)
+        public void AddToBanlist(CSteamID steamID, string UserName)
         {
             if(!BanListContainsSteamID(steamID))
             {
-                BannedSteamIDs.Add(steamID);
+                BannedUsers.Add(steamID, UserName);
                 UpdateConfigFile();
             }
         }
 
         private void LoadBannedSteamIDs()
         {
-            BannedSteamIDs= new List<CSteamID>();
-            string[] IDList = BepinPlugin.Bindings.BanList.Value.Split(',');
-            foreach (string id in IDList)
+            BannedUsers = new Dictionary<CSteamID, string>();
+            string[] UserList = BepinPlugin.Bindings.BanList.Value.Split(',');
+            if (UserList[0].IsNullOrWhiteSpace())
             {
-                if (ulong.TryParse(id, out ulong ulongid))
+                return;
+            }
+            foreach (string id in UserList)
+            {
+                string[] User = id.Split(new char[] { ':' }, 2); //SteamID::UserName
+                if(User.Length != 2)
+                {
+                    BepinPlugin.Log.LogError(User.Length + " Bad user data: " + id );
+                    continue;
+                }
+                if (ulong.TryParse(User[0], out ulong ulongid))
                 {
                     CSteamID SteamID = (CSteamID)ulongid;
                     if(SteamID.IsValid())
                     {
-                        BannedSteamIDs.Add(SteamID);
+                        BannedUsers.Add(SteamID, User[1]);
                     }
+                }
+                else
+                {
+                    BepinPlugin.Log.LogError("Bad SteamID: " + id);
                 }
             }
         }
@@ -87,8 +105,8 @@ namespace SteamBanning
         private void UpdateConfigFile()
         {
             bool firstLoop = true;
-            string IDString = string.Empty;
-            foreach(CSteamID id in BannedSteamIDs)
+            string userListString = string.Empty;
+            foreach(var UserData in BannedUsers)
             {
                 if (firstLoop)
                 {
@@ -96,13 +114,13 @@ namespace SteamBanning
                 }
                 else
                 {
-                    IDString += ",";
+                    userListString += ",";
                 }
 
-                IDString += id.ToString();
+                userListString += $"{UserData.Key}:{UserData.Value}";
             }
 
-            BepinPlugin.Bindings.BanList.Value = IDString;
+            BepinPlugin.Bindings.BanList.Value = userListString;
         }
     }
 }
