@@ -5,7 +5,7 @@
 # SteamBanning
 
 Version 1.0.0  
-For Game Version 0.25.1  
+For Game Version 0.25.2  
 Developed by Dragon  
 Requires VoidManager 1.0.4
 
