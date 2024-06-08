@@ -230,8 +230,6 @@ namespace SteamBanning
 
 
 
-
-
         private void UnBanningUI()
         {
             //Refresh DisplayObjects array every 5 seconds
