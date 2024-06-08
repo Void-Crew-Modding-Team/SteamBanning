@@ -10,7 +10,7 @@ namespace SteamBanning
             Events.Instance.PlayerEnteredRoom += BanListManager.Instance.OnPlayerJoin;
         }
 
-        public override MultiplayerType MPType => MultiplayerType.Client;
+        public override MultiplayerType MPType => MultiplayerType.Host;
 
         public override string Author => "Dragon";
 
