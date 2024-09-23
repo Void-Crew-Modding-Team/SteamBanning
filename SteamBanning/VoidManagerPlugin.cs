@@ -12,8 +12,10 @@ namespace SteamBanning
 
         public override MultiplayerType MPType => MultiplayerType.Host;
 
-        public override string Author => "Dragon";
+        public override string Author => MyPluginInfo.PLUGIN_AUTHORS;
 
-        public override string Description => "Provides banning feature to hosts.";
+        public override string Description => MyPluginInfo.PLUGIN_DESCRIPTION;
+
+        public override string ThunderstoreID => MyPluginInfo.PLUGIN_THUNDERSTORE_ID;
     }
 }
