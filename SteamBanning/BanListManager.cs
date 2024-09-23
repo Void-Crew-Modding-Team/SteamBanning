@@ -10,11 +10,7 @@ namespace SteamBanning
 {
     internal class BanListManager
     {
-        public static BanListManager Instance
-        {
-            get;
-            internal set;
-        }
+        public static BanListManager Instance { get; internal set; }
 
         //List<CSteamID> BannedSteamIDs;
         internal Dictionary<CSteamID, string> BannedUsers;
@@ -120,13 +116,9 @@ namespace SteamBanning
             foreach(var UserData in BannedUsers)
             {
                 if (firstLoop)
-                {
                     firstLoop = false;
-                }
                 else
-                {
                     userListString += ",";
-                }
 
                 userListString += $"{UserData.Key}:{UserData.Value}";
             }
